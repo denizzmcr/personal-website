@@ -30,9 +30,11 @@ window.CONTENT = {
     linkedin: "https://www.linkedin.com/in/deniz-mucur-66b63136b/",
     email: "denizmucur5@gmail.com",
 
-    // Your CV. Put the PDF in this folder and write its filename here,
-    // e.g. "deniz-mucur-cv.pdf" — or paste a full https:// link if it
-    // lives somewhere else. Empty means no résumé link is shown.
+    // Your CV, as a full https:// link to wherever it's hosted — the
+    // button opens it in a new tab. (A bare filename works too, and
+    // downloads instead, but it means committing the PDF to this public
+    // repo, where it stays in the git history for good.)
+    // Empty means no résumé button is shown at all.
     resume: "",
   },
 
