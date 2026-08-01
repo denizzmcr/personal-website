@@ -15,7 +15,6 @@
     head.innerHTML = `<h1>Post not found</h1>`;
     body.innerHTML = `<p>${msg}</p><p><a href="blog.html">← Back to the blog</a></p>`;
     document.title = `Post not found — ${window.CONTENT.profile.name}`;
-    initReveal();
   }
 
   /* content.js already carries the title, so drop a duplicate leading H1. */
@@ -55,23 +54,16 @@
     // newer is earlier in the list
     const newer = posts[i - 1];
     const older = posts[i + 1];
-    nav.innerHTML = `
-      <span>${
-        older
-          ? `<a href="post.html?p=${encodeURIComponent(
-              older.slug
-            )}">← ${esc(older.title)}</a>`
-          : ""
-      }</span>
-      <span class="post-nav-next">${
-        newer
-          ? `<a href="post.html?p=${encodeURIComponent(
-              newer.slug
-            )}">${esc(newer.title)} →</a>`
-          : ""
-      }</span>`;
+    const linkTo = (p, label) =>
+      `<a class="link" href="post.html?p=${encodeURIComponent(
+        p.slug
+      )}">${label}</a>`;
 
-    initReveal();
+    nav.innerHTML = `
+      <span>${older ? linkTo(older, `← ${esc(older.title)}`) : ""}</span>
+      <span class="post-nav-next">${
+        newer ? linkTo(newer, `${esc(newer.title)} →`) : ""
+      }</span>`;
   }
 
   document.addEventListener("DOMContentLoaded", render);

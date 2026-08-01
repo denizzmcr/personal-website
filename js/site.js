@@ -1,5 +1,5 @@
-/* site.js — reads window.CONTENT and builds the shared chrome plus
-   the entry lists. Every page loads this. */
+/* site.js — reads window.CONTENT and builds the page.
+   Rendering and data loading only; every animation on this site is CSS. */
 
 const C = window.CONTENT;
 
@@ -22,8 +22,6 @@ function fmtDate(iso) {
     year: "numeric",
   });
 }
-
-const yearOf = (iso) => String(iso || "").slice(0, 4);
 
 /** Posts newest first. */
 function sortedPosts() {
@@ -54,21 +52,17 @@ function renderHeader() {
     ["blog.html", "Blog"],
   ];
   el.innerHTML = `
-    <div class="wrap">
-      <a class="brand" href="index.html">${esc(C.profile.name)}</a>
-      <nav class="site-nav" aria-label="Primary">
-        <ul>
-          ${pages
-            .map(
-              ([href, label]) =>
-                `<li><a href="${href}"${
-                  href === here ? ' aria-current="page"' : ""
-                }>${label}</a></li>`
-            )
-            .join("")}
-        </ul>
-      </nav>
-    </div>`;
+    <a class="brand" href="index.html">${esc(C.profile.name)}</a>
+    <nav class="site-nav" aria-label="Primary">
+      ${pages
+        .map(
+          ([href, label]) =>
+            `<a class="link" href="${href}"${
+              href === here ? ' aria-current="page"' : ""
+            }>${label}</a>`
+        )
+        .join("")}
+    </nav>`;
 }
 
 function renderFooter() {
@@ -77,59 +71,22 @@ function renderFooter() {
   el.innerHTML = `
     <div class="wrap">
       <p class="foot-bio">${esc(C.profile.bio)}</p>
-      <ul class="foot-links">
-        <li><a href="${esc(C.links.github)}" rel="me noopener">GitHub</a></li>
-        <li><a href="${esc(C.links.linkedin)}" rel="me noopener">LinkedIn</a></li>
-        <li><a href="${mailto()}">${esc(C.links.email)}</a></li>
-      </ul>
+      <div class="foot-links">
+        <a class="link link--static" href="${esc(
+          C.links.github
+        )}" rel="me noopener">GitHub</a>
+        <a class="link link--static" href="${esc(
+          C.links.linkedin
+        )}" rel="me noopener">LinkedIn</a>
+        <a class="link link--static" href="${mailto()}">${esc(
+          C.links.email
+        )}</a>
+      </div>
       <p class="colophon">
         <span>© ${new Date().getFullYear()} ${esc(C.profile.name)}</span>
         <button class="egg" data-egg aria-label="A small surprise">·</button>
       </p>
     </div>`;
-}
-
-/* ── entry rendering ──────────────────────────────────────── */
-
-function postEntry(p) {
-  return `
-    <a class="entry" href="post.html?p=${encodeURIComponent(p.slug)}">
-      <span class="entry-tile">${glyph(p.glyph)}</span>
-      <span class="entry-body">
-        <span class="entry-title">${esc(p.title)}</span>
-        <span class="entry-blurb">${esc(p.blurb)}</span>
-        <span class="entry-meta">${esc(fmtDate(p.date))}</span>
-      </span>
-    </a>`;
-}
-
-function projectEntry(p, { full }) {
-  const links = (p.links || [])
-    .filter((l) => l && l.url)
-    .map(
-      (l) =>
-        `<a href="${esc(l.url)}" rel="noopener">${esc(l.label || "Link")}</a>`
-    )
-    .join("");
-  return `
-    <article class="entry${full ? " entry--card" : ""}">
-      <div class="entry-tile">${glyph(p.glyph)}</div>
-      <div class="entry-body">
-        <h3 class="entry-title">${esc(p.title)}${
-          p.year ? `<span class="entry-year">${esc(p.year)}</span>` : ""
-        }</h3>
-        <p class="entry-blurb">${esc(p.description)}</p>
-        ${p.role ? `<p class="entry-meta">${esc(p.role)}</p>` : ""}
-        ${links && full ? `<p class="entry-links">${links}</p>` : ""}
-      </div>
-    </article>`;
-}
-
-/** Drops a list into `sel`, or a quiet note when there is nothing yet. */
-function fill(sel, html, emptyNote) {
-  const el = document.querySelector(sel);
-  if (!el) return;
-  el.innerHTML = html || `<p class="empty">${esc(emptyNote)}</p>`;
 }
 
 function renderContact() {
@@ -145,7 +102,83 @@ function renderContact() {
     <a class="btn" href="${mailto()}" data-copy-email="${esc(C.links.email)}">
       ${ICONS.mail}<span data-label>Email</span>
     </a>`;
+  initCopy();
 }
+
+/** Copies the address instead of opening a mail client, where possible. */
+function initCopy() {
+  const btn = document.querySelector("[data-copy-email]");
+  if (!btn) return;
+  const label = btn.querySelector("[data-label]");
+  const original = label.textContent;
+  let timer;
+
+  btn.addEventListener("click", async (e) => {
+    if (!navigator.clipboard) return; // let the mailto: href do its job
+    e.preventDefault();
+    try {
+      await navigator.clipboard.writeText(btn.dataset.copyEmail);
+    } catch {
+      location.href = btn.href;
+      return;
+    }
+    label.textContent = "Copied";
+    btn.classList.add("is-copied");
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      label.textContent = original;
+      btn.classList.remove("is-copied");
+    }, 2000);
+  });
+}
+
+/* ── cards ────────────────────────────────────────────────── */
+
+function postCard(p) {
+  return `
+    <li class="card rise">
+      <span class="card-mark">${glyph(p.glyph)}</span>
+      <h3 class="card-title"><a class="card-hit" href="post.html?p=${encodeURIComponent(
+        p.slug
+      )}">${esc(p.title)}</a></h3>
+      <p class="card-text">${esc(p.blurb)}</p>
+      <p class="card-meta">${esc(fmtDate(p.date))}</p>
+    </li>`;
+}
+
+function projectCard(p) {
+  const links = (p.links || [])
+    .filter((l) => l && l.url)
+    .map(
+      (l) =>
+        `<a class="link" href="${esc(l.url)}" rel="noopener">${esc(
+          l.label || "Link"
+        )}</a>`
+    )
+    .join("");
+  const meta = [p.role, p.year].filter(Boolean).map(esc).join(" · ");
+  return `
+    <li class="card rise">
+      <span class="card-mark">${glyph(p.glyph)}</span>
+      <h3 class="card-title">${esc(p.title)}</h3>
+      <p class="card-text">${esc(p.description)}</p>
+      ${meta ? `<p class="card-meta">${meta}</p>` : ""}
+      ${links ? `<p class="card-links">${links}</p>` : ""}
+    </li>`;
+}
+
+/** Drops a list into `sel`, or a quiet note when there is nothing yet. */
+function fill(sel, html, emptyNote) {
+  const el = document.querySelector(sel);
+  if (!el) return;
+  if (html) {
+    el.innerHTML = html;
+  } else {
+    el.outerHTML = `<p class="empty">${esc(emptyNote)}</p>`;
+  }
+}
+
+/* ── pages ────────────────────────────────────────────────── */
 
 function renderHome() {
   // The HTML carries the same words as a no-JS fallback; content.js wins.
@@ -155,17 +188,20 @@ function renderHome() {
   if (tag) tag.textContent = C.profile.tagline;
 
   renderContact();
-  const posts = sortedPosts();
+
   fill(
     "[data-home-posts]",
-    posts.slice(0, 3).map(postEntry).join(""),
+    sortedPosts().slice(0, 3).map(postCard).join(""),
     "Nothing written yet."
   );
 
-  const featured = (C.projects || []).filter((p) => p.featured).slice(0, 3);
   fill(
     "[data-home-projects]",
-    featured.map((p) => projectEntry(p, { full: false })).join(""),
+    (C.projects || [])
+      .filter((p) => p.featured)
+      .slice(0, 3)
+      .map(projectCard)
+      .join(""),
     "Nothing to show yet."
   );
 
@@ -174,7 +210,7 @@ function renderHome() {
     (C.experience || [])
       .map(
         (x) => `
-      <li class="xp">
+      <li class="xp rise">
         <span class="xp-org">${esc(x.org)}</span>
         <span class="xp-period">${esc(x.period)}</span>
         <span class="xp-role">${esc(x.role)}</span>
@@ -189,60 +225,45 @@ function renderHome() {
 function renderProjectsPage() {
   fill(
     "[data-all-projects]",
-    (C.projects || []).map((p) => projectEntry(p, { full: true })).join(""),
+    (C.projects || []).map(projectCard).join(""),
     "Nothing to show yet — check back."
   );
 }
 
+/* Blog list pages in from the content set rather than rendering all of it
+   at once, so the list scales to any number of posts. The button is the
+   guaranteed path; the observer just presses it for you on scroll. */
+const PAGE_SIZE = 8;
+
 function renderBlogPage() {
+  const list = document.querySelector("[data-all-posts]");
+  const more = document.querySelector("[data-more]");
+  if (!list) return;
+
   const posts = sortedPosts();
-  let html = "";
-  let year = null;
-  for (const p of posts) {
-    const y = yearOf(p.date);
-    if (y !== year) {
-      year = y;
-      html += `<h2 class="year-head">${esc(y)}</h2>`;
-    }
-    html += postEntry(p);
-  }
-  fill("[data-all-posts]", html, "Nothing written yet — check back.");
-}
-
-/* ── motion ───────────────────────────────────────────────── */
-
-/** Fades sections in, and plays each glyph's draw-in once when first seen. */
-function initReveal() {
-  const show = (el) =>
-    el.classList.add(el.matches(".glyph") ? "is-seen" : "is-visible");
-  const targets = document.querySelectorAll(".reveal, .glyph");
-  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (reduced || !("IntersectionObserver" in window)) {
-    targets.forEach(show);
+  if (!posts.length) {
+    fill("[data-all-posts]", "", "Nothing written yet — check back.");
+    more?.remove();
     return;
   }
 
-  // Only now is it safe to hide anything — see .js-reveal in the CSS.
-  document.documentElement.classList.add("js-reveal");
+  let shown = 0;
+  const loadNext = () => {
+    const batch = posts.slice(shown, shown + PAGE_SIZE);
+    list.insertAdjacentHTML("beforeend", batch.map(postCard).join(""));
+    shown += batch.length;
+    if (shown >= posts.length) more?.remove();
+  };
 
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const e of entries) {
-        if (!e.isIntersecting) continue;
-        show(e.target);
-        io.unobserve(e.target);
-      }
-    },
-    { rootMargin: "0px 0px -8% 0px", threshold: 0.15 }
-  );
-  targets.forEach((el) => io.observe(el));
+  loadNext();
+  if (!more) return;
+  more.addEventListener("click", loadNext);
 
-  // Belt and braces: if the observer never reports (backgrounded tab, an
-  // engine that doesn't paint), show everything rather than nothing.
-  setTimeout(() => {
-    document.querySelectorAll(".reveal:not(.is-visible)").forEach(show);
-  }, 800);
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting) && more.isConnected) loadNext();
+    }).observe(more);
+  }
 }
 
 /* ── boot ─────────────────────────────────────────────────── */
@@ -255,7 +276,4 @@ document.addEventListener("DOMContentLoaded", () => {
   if (page === "home") renderHome();
   if (page === "projects") renderProjectsPage();
   if (page === "blog") renderBlogPage();
-
-  // post.js renders its own body first, then asks for the reveal pass
-  if (page !== "post") initReveal();
 });

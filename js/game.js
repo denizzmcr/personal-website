@@ -166,12 +166,13 @@
     const cell = w / CELLS;
     const pad = cell * 0.14;
     const css = getComputedStyle(document.documentElement);
-    const accent = css.getPropertyValue("--accent").trim() || "#2b5cff";
-    const ink = css.getPropertyValue("--ink").trim() || "#111";
+    const ink = css.getPropertyValue("--ink").trim() || "#0a0a0a";
 
     ctx.clearRect(0, 0, w, w);
 
-    ctx.fillStyle = ink;
+    // food reads as an outline so it stays distinct from the solid snake
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(
       (state.food.x + 0.5) * cell,
@@ -180,9 +181,9 @@
       0,
       Math.PI * 2
     );
-    ctx.fill();
+    ctx.stroke();
 
-    ctx.fillStyle = accent;
+    ctx.fillStyle = ink;
     state.snake.forEach((s, i) => {
       ctx.globalAlpha = state.over ? 0.35 : 1 - (i / state.snake.length) * 0.45;
       const r = cell * 0.25;

@@ -3,6 +3,23 @@
 Personal site. Plain HTML, CSS and JavaScript — no build step, no dependencies
 to install. Everything you'd normally edit lives in **`content.js`**.
 
+## Design system
+
+Ahlin-style minimalism, and the rules are worth keeping if you extend it:
+
+- **Monochrome only.** Pure white background, near-black text, grey for
+  metadata. No colour anywhere — all five values are at the top of
+  `css/style.css`.
+- **Fluid type.** Every size is a `clamp()`. Section headers are oversized and
+  heavy; body text is medium weight and capped at roughly 70 characters a line.
+- **Flex card grid.** Two half-width cards, then one full-width feature,
+  repeating. Handled by `.card:nth-child(3n)` — nothing to set per card.
+- **Motion is CSS, never JavaScript.** Hover uses layered box-shadows for depth;
+  inline links animate an underline via `::after`; the scroll reveal uses
+  `animation-timeline: view()`, which degrades to plain visible text in browsers
+  that don't support it.
+- **No images.** Illustration is CSS shapes, inline SVG and typography.
+
 ## Running it locally
 
 The blog fetches Markdown files, which browsers block over `file://`. So open it
@@ -36,6 +53,10 @@ Posts sort themselves by date, so the order in the file doesn't matter.
 If your `.md` starts with a `# Title` line it gets dropped automatically — the
 title from `content.js` is the one that renders.
 
+The blog index renders eight posts at a time and loads the rest as you scroll,
+with a "Load more" button as the guaranteed path. Change `PAGE_SIZE` in
+`js/site.js` to adjust.
+
 ## Adding a project or a role
 
 Same idea — copy the example block in the `projects` or `experience` list in
@@ -46,11 +67,12 @@ Delete an entry entirely and that section just says nothing is there yet.
 
 ## Glyphs
 
-The small animated illustrations. Pick one per entry with `glyph:`:
+The small line-art marks on each card. Pick one per entry with `glyph:`:
 
 `nodes` · `bubble` · `ascent` · `orbit` · `grid` · `wave` · `stack` · `spark`
 
-They live in `js/glyphs.js` if you want to draw more.
+They live in `js/glyphs.js` if you want to draw more. Each animates on card
+hover, in CSS.
 
 ## Your name and tagline
 
@@ -61,7 +83,8 @@ both places.
 ## The easter egg
 
 The Konami code (↑↑↓↓←→←→BA) opens a game of Snake. So does the faint dot next
-to the copyright line.
+to the copyright line. It's a canvas game, so it is the one thing on the site
+driven by JavaScript rather than CSS.
 
 ## Deploying
 
@@ -73,11 +96,14 @@ Vercel, framework preset **Other**, no build command, output directory `.`.
 ```
 index.html      home
 projects.html   all projects
-blog.html       post index
+blog.html       post index, pages in as you scroll
 post.html       renders one post (?p=slug)
 content.js      ← the file you edit
 posts/*.md      your writing
-css/style.css   all styling; colours are the variables at the top
-js/             glyphs, shared rendering, hero canvas, post loader, game
+css/style.css   the whole design system; tokens are at the top
+js/site.js      rendering, list paging, email copy
+js/glyphs.js    the SVG marks
+js/post.js      loads and renders a Markdown post
+js/game.js      the easter egg
 vendor/         marked.js, for turning Markdown into HTML
 ```

@@ -21,56 +21,49 @@
     <script defer src="content.js"></script>
     <script defer src="js/glyphs.js"></script>
     <script defer src="js/site.js"></script>
-    <script defer src="js/hero.js"></script>
     <script defer src="js/game.js"></script>
   </head>
 
   <body data-page="home">
     <a class="skip" href="#main">Skip to content</a>
 
-    <header class="site-head" data-site-head></header>
+    <header class="site-head wrap" data-site-head></header>
 
-    <main id="main">
+    <main id="main" class="wrap">
       <section class="hero">
-        <canvas id="hero-canvas" aria-hidden="true"></canvas>
-        <div class="wrap">
-          <!-- Text below is the fallback for no-JS; content.js is authoritative. -->
-          <h1 data-hero-name>Deniz Mucur</h1>
-          <p class="tagline" data-hero-tagline>
-            I think, talk (sometimes too much) &amp; initiate
-          </p>
-          <div class="contact" data-contact>
-            <a class="btn" href="https://github.com/denizzmcr">GitHub</a>
-            <a class="btn" href="https://www.linkedin.com/in/deniz-mucur-66b63136b/">LinkedIn</a>
-            <a class="btn" href="mailto:denizmucur5@gmail.com">Email</a>
-          </div>
+        <!-- Text below is the fallback for no-JS; content.js is authoritative. -->
+        <h1 class="hero-name" data-hero-name>Deniz Mucur</h1>
+        <p class="hero-tagline" data-hero-tagline>
+          I think, talk (sometimes too much) &amp; initiate
+        </p>
+        <div class="contact" data-contact>
+          <a class="btn" href="https://github.com/denizzmcr">GitHub</a>
+          <a class="btn" href="https://www.linkedin.com/in/deniz-mucur-66b63136b/">LinkedIn</a>
+          <a class="btn" href="mailto:denizmucur5@gmail.com">Email</a>
         </div>
+        <div class="hero-rule" aria-hidden="true"></div>
       </section>
 
-      <div class="wrap">
-        <section class="section reveal">
-          <div class="section-head">
-            <h2>Writing</h2>
-            <a class="section-more" href="blog.html">All writing</a>
-          </div>
-          <div class="entries" data-home-posts></div>
-        </section>
+      <section class="section">
+        <div class="section-head">
+          <h2 class="section-title rise">Writing</h2>
+          <a class="link link--static" href="blog.html">All writing</a>
+        </div>
+        <ul class="grid" data-home-posts></ul>
+      </section>
 
-        <section class="section reveal">
-          <div class="section-head">
-            <h2>Projects</h2>
-            <a class="section-more" href="projects.html">All projects</a>
-          </div>
-          <div class="entries" data-home-projects></div>
-        </section>
+      <section class="section">
+        <div class="section-head">
+          <h2 class="section-title rise">Projects</h2>
+          <a class="link link--static" href="projects.html">All projects</a>
+        </div>
+        <ul class="grid" data-home-projects></ul>
+      </section>
 
-        <section class="section reveal">
-          <div class="section-head">
-            <h2>Experience</h2>
-          </div>
-          <ul class="entries" data-experience></ul>
-        </section>
-      </div>
+      <section class="section">
+        <h2 class="section-title rise">Experience</h2>
+        <ul class="xp-list" data-experience></ul>
+      </section>
     </main>
 
     <footer class="site-foot" data-site-foot></footer>
