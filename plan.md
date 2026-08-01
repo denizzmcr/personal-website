@@ -1,287 +1,304 @@
-# Plan — personal website
+# Plan — a personal website
 
-Written 1 August 2026, describing the site **as it stands**, not as it was first
-sketched. The original plan (drafted before the redesign) is out of date in
-several places; this replaces it. The README is the user-facing document — this
-one is the working record: why things are the way they are, and what's left.
+A brief for building a personal site: a front door with three contact routes, a
+place to publish writing, and a place to show projects. Written as direction,
+not description — hand it to someone (or something) starting from an empty
+repo and it should be enough to build from.
 
 ---
 
-## What this is
+## The idea
 
-A personal site for Deniz Mucur that works as a front door: three contact
-routes, a place to publish writing, a place to show projects. Visual reference
-is [tobiasahlin.com](https://tobiasahlin.com) — light, editorial, monochrome,
-very little prose, small line-art marks carrying the visual weight.
+Light, editorial, monochrome. Reference point:
+[tobiasahlin.com](https://tobiasahlin.com) — black on white, oversized type,
+extreme whitespace, very little prose, small line-art marks carrying the visual
+weight. No photography, no stock illustration, no colour accent.
 
-The GitHub account behind it is new, so the site ships as an **empty,
-well-commented structure** to fill in over time rather than a site padded with
-invented content.
+Assume the owner has little to show at first. Ship an **empty, well-commented
+structure** they fill in over time — one example entry per section, clearly
+marked — rather than a site padded with invented content. The measure of success
+is that adding a blog post means writing one Markdown file and four lines of
+config.
 
-### Decisions, settled
+### Constraints to hold
 
 | | |
 |---|---|
 | Stack | Vanilla HTML/CSS/JS. No framework, no npm, no build step. |
-| Theme | Monochrome — black on white, no colour accent, no images. |
+| Theme | Monochrome. One ink colour re-themes the whole site. |
 | Structure | Overview (home) + Projects + Blog, plus a post renderer. |
-| Authoring | Markdown files in `posts/`, indexed from `content.js`. |
+| Authoring | Markdown files in `posts/`, indexed from one config file. |
 | Projects | Full description on the projects page; no per-project pages. |
 | Illustration | Hand-coded line-art SVG. No image assets anywhere. |
 | Seed content | One commented example per array, nothing else. |
-| Easter egg | Konami code → Snake. |
-| Deploy | GitHub → Vercel, static, push to `main` to redeploy. |
+| Deploy | Git host → Vercel, static, push to `main` to redeploy. |
 
-The no-build constraint is the load-bearing one. Every other decision here
-follows from it: no fonts to fetch, no bundler, no module graph, `content.js`
-as a plain script assigning a global rather than an ES module.
+The no-build constraint is the load-bearing one — everything else follows from
+it. No fonts to fetch, no bundler, no module graph, and the config file is a
+plain script assigning a global rather than an ES module, so every page reads it
+with one `<script>` tag and no CORS or module friction.
+
+### Details to wire in
+
+Collect these before starting; they're the only project-specific values.
+
+| | |
+|---|---|
+| Name | for the hero, the brand link and every `<title>` |
+| Tagline | one line, sets the tone of the whole site |
+| GitHub · LinkedIn · email | the three contact buttons |
+| Résumé | a link to wherever the PDF is hosted |
 
 ---
 
-## File map
+## File structure
 
 ```
-personal-website/
-├── index.html          overview          109 lines
-├── projects.html       all projects       32
-├── blog.html           post index         33
-├── post.html           one post (?p=…)    34
-├── content.js          ← THE file to edit 79
-├── css/style.css       everything visual 1008
+├── index.html          overview
+├── projects.html       all projects
+├── blog.html           post index
+├── post.html           one post (?p=slug)
+├── content.js          ← THE file the owner edits
+├── css/style.css       everything visual
 ├── js/
-│   ├── site.js         renders every page 308
-│   ├── glyphs.js       the 8 SVG marks     76
-│   ├── hero.js         bar field + thinker 298
-│   ├── post.js         Markdown post       70
-│   └── game.js         Konami + Snake     333
+│   ├── site.js         shared: header, footer, cards, page renderers
+│   ├── glyphs.js       the SVG mark library
+│   ├── hero.js         the two hero interactions
+│   ├── post.js         loads and renders one Markdown post
+│   └── game.js         the easter egg
 ├── posts/example-post.md
-├── vendor/marked.min.js   vendored, MIT
+├── vendor/marked.min.js   vendored Markdown parser, MIT
 ├── favicon.svg · robots.txt · vercel.json · .gitignore
-├── README.md           how to use it
-├── CLAUDE.md           project instruction file (see Open questions)
-└── plan.md             this file
+└── README.md           how to add a post, a project, a link
 ```
 
-Scripts load `defer` in a fixed order — `content.js`, `glyphs.js`, `site.js`,
-then the optional `hero.js` / `game.js` / `post.js`. `site.js` and `post.js`
-both read the globals `esc()`, `fmtDate()` and `glyph()`; that's why order
-matters and why none of these are modules.
+Load scripts `defer`, in order: `content.js`, `glyphs.js`, `site.js`, then the
+optional `hero.js` / `game.js` / `post.js`. The renderers share plain globals
+(an escaper, a date formatter, the glyph lookup), which is why order matters and
+why none of these are modules. Keep it that way — it's the simplest thing that
+works without a bundler.
 
 ---
 
-## `content.js` — the single source of truth
+## 1. `content.js` — the single source of truth
+
+Everything the owner would ever change lives here. They should never open the
+HTML.
 
 ```js
 window.CONTENT = {
-  profile: { name, tagline, about, secret, bio },
-  links:   { github, linkedin, email, resume },
-  projects: [{ title, year, role, description, links[], glyph, featured }],
-  posts:    [{ slug, title, date, blurb, glyph }],
+  profile: {
+    name, tagline,
+    about,    // 2–3 sentences — the About block on the home page
+    secret,   // key caps giving the easter egg away; "" keeps it
+    bio,      // one line in the footer of every page
+  },
+  links: { github, linkedin, email, resume },
+
+  // Copy the block for each project.
+  //   role     — your part in it; omit if n/a
+  //   links    — as many as you like, or []
+  //   featured — true also puts it on the home page (max 3)
+  projects: [{ title, year, role, description, links: [], glyph, featured }],
+
+  // To publish: create posts/<slug>.md, then add an entry here.
+  posts: [{ slug, title, date, blurb, glyph }],
 };
 ```
 
-- `profile.about` — the About block on the home page. Empty hides it.
-- `profile.secret` — the key caps that give the Konami code away. `""` keeps it.
-- `profile.bio` — one line in the footer of every page. Empty hides it.
-- `links.resume` — a full `https://` link opens in a new tab; a bare filename
-  downloads, but only by committing the PDF to this public repo, where it stays
-  in git history for good. Currently a Google Drive PDF link — chosen precisely
-  to keep the file out of history.
-- `featured: true` also puts a project on the home page, capped at 3.
-- Posts sort themselves by date; order in the file is irrelevant.
+Rules the renderers must honour:
 
-Every array ships with exactly one example entry. Empty an array and the section
-renders a quiet line ("Nothing written yet.") rather than a broken grid — that's
-`fill()` in `site.js`, which swaps the `<ul>` for a `<p class="empty">`.
+- **Every empty value hides its own UI.** No `about`, no About block. No `bio`,
+  no footer line. No `resume`, no button. A half-filled section never ships.
+- **Empty arrays render a quiet line** — "Nothing written yet." — not a broken
+  grid. Swap the `<ul>` for a `<p>`; don't leave an empty list in the DOM.
+- **Posts sort themselves by date**, so file order is irrelevant.
+- **`resume` accepts either form**: a full `https://` link opens in a new tab; a
+  bare filename downloads (`download` is same-origin only, so the two cases need
+  different markup). Say plainly in the comment that the second means committing
+  the PDF to a public repo, where it stays in git history for good — hosting it
+  elsewhere is the better default.
+
+Ship exactly one example entry per array, commented, so the shape is obvious
+and deleting it is obviously safe.
 
 ---
 
-## Pages
+## 2. Pages
 
-**`index.html`** — hero (name, tagline, bar-field canvas, the thinker, three
-contact buttons) → Writing, newest 3 → Projects, up to 3 featured → About
-(text, the key caps, the résumé button) → footer. The name and tagline are also
-written into the HTML as a no-JS fallback, so **changing them means changing
-both** `content.js` and `index.html`.
+**Overview.** Hero → Writing (newest 3) → Projects (up to 3 `featured`) →
+About → footer.
 
-The email button copies the address to the clipboard and flips to "Copied" for
-two seconds, falling back to its own `mailto:` href where the Clipboard API
-isn't available.
+- The hero is name, tagline, a canvas behind them, a line-art figure, and the
+  three contact buttons.
+- Write the name and tagline into the HTML too, as a no-JS fallback. Note in the
+  README that this means they live in two places.
+- The email button copies the address and flips to "Copied" for two seconds,
+  with its own `mailto:` href as the fallback where the Clipboard API isn't
+  available.
+- The About block is the prose plus the résumé button — this is where a CV lives,
+  in place of a list of past roles.
 
-**`projects.html`** — every project as a card, same renderer as the home page.
+**Projects.** Every project as a card; the same renderer as the home page.
 
-**`blog.html`** — all posts, newest first, paged in 8 at a time. The "More"
-button is the guaranteed path; an `IntersectionObserver` just presses it for you
-on scroll, so the list works with the observer unavailable.
+**Blog.** All posts, newest first, paged in ~8. Make the "More" button the
+guaranteed path and let an `IntersectionObserver` merely press it on scroll, so
+the page still works if the observer is unavailable.
 
-**`post.html`** — reads `?p=slug`, matches it against `content.js` **before**
-fetching, so nothing arbitrary from the URL reaches the fetch path. Renders with
-`marked`, strips a duplicate leading `# H1`, sets `document.title` and the meta
-description, and links prev/next. Unknown slug → "Post not found".
+**Post.** Read `?p=slug`, **match it against the config before fetching** — so
+nothing arbitrary from the URL reaches the fetch path — then render the
+Markdown. Strip a duplicate leading `# H1`, since the config already carries the
+title. Set `document.title` and the meta description. Link prev/next. An unknown
+slug gets a friendly "Post not found" and a way back.
 
 Header nav on every page: Overview · Projects · Blog, current marked with
 `aria-current="page"`.
 
 ---
 
-## Design system
+## 3. Design system
 
-All of it is custom properties at the top of `css/style.css`:
+Custom properties at the top of the stylesheet, nothing hard-coded below them:
 
 ```css
---bg #ffffff  --ink #0a0a0a  --muted #6e6e6e  --faint #9b9b9b  --rule #ebebeb
---wrap 72rem  --measure 50ch  --gap/--section-gap/--card-pad (clamp)
---step--1 … --step-4          fluid type, clamp() throughout
---sans (system stack)  --mono  --ease
+--bg --ink --muted --faint --rule        /* monochrome only */
+--wrap --measure --gap --section-gap --card-pad
+--step--1 … --step-4                     /* fluid type, clamp() */
+--sans --mono --ease
 ```
 
-- No colour accent. The redesign dropped the original blue; the site is now
-  strictly monochrome, and `--ink` alone re-themes everything, game included.
-- System font stack — zero font requests, instant first paint.
-- `--measure: 50ch` caps prose at ~72 characters. It reads low because `ch` is
-  the width of "0", far wider than the average letter; `70ch` renders ~100.
-- Type is fluid everywhere, so nothing snaps at a breakpoint. One layout
-  breakpoint, at `46rem`.
-- Cards alternate two half-width then one full-width via `.card:nth-child(3n)` —
-  no wrapper markup, no JS, so it holds for any number of cards.
+- **No accent colour.** Changing `--ink` alone should re-theme the entire site,
+  easter egg included. That's the test of whether the tokens are honest.
+- **System font stack.** Zero font requests, instant first paint.
+- **Fluid type.** Every size a `clamp()`, so nothing snaps at a breakpoint; it
+  scales continuously from phone to desktop. One layout breakpoint is enough.
+- **Cap the measure** so prose never runs long. Bear in mind `ch` is the width
+  of "0" — far wider than the average letter — so `70ch` renders about 100
+  characters. Around `50ch` is the ~72-character line you actually want.
+- **Alternate the cards**: two half-width, then one full-width, via
+  `:nth-child(3n)`. No wrapper markup, no JS, holds for any number of cards.
+- Visible `:focus-visible` rings throughout.
 
 ---
 
-## Motion
+## 4. Motion
 
-The rule is **CSS wherever it can be**; JavaScript only where CSS genuinely
-can't reach. Everything sits behind `prefers-reduced-motion` — the decorative
-work is inside `@media (prefers-reduced-motion: no-preference)` blocks so it's
-opt-in rather than switched off after the fact.
+**Do it in CSS wherever CSS can reach.** Reserve JavaScript for what it
+genuinely can't. Put decorative motion *inside*
+`@media (prefers-reduced-motion: no-preference)` so it's opt-in, rather than
+switching it off afterwards.
 
-CSS only:
-- Hero entrance — the name and tagline lift out of a `mask`.
+CSS carries:
+- The hero entrance — the name and tagline lifting out of a `mask`.
 - Link underlines drawn with `::after`.
-- Scroll reveal via `animation-timeline: view()`, inside `@supports`, so
+- The scroll reveal, via `animation-timeline: view()` wrapped in `@supports`, so
   browsers without it simply show the content.
 - Every glyph animation, on hover and on first sight.
 
-JavaScript (`js/hero.js`, both purely decorative):
-- **The bar field** — a canvas of vertical bars easing between two
-  noise-seeded patterns, thickening near the pointer, with a ring on click.
-  Patterns are built once per resize, not per frame. Drawing is gated on *both*
-  an `IntersectionObserver` and `visibilitychange`, tracked as two independent
-  flags so neither event can strand the loop in the wrong state.
-- **The thinker** — JS writes only `--think` and `--tilt`; the stylesheet does
-  the actual moving. The canvas ignores pointer events so links stay clickable;
-  the `.hero` section listens on its behalf.
+JavaScript carries two hero pieces, both purely decorative and both absent under
+reduced motion:
+- **A generative canvas behind the hero** that reacts to the pointer. Build any
+  per-pattern data once per resize, never per frame — a background isn't worth
+  60 allocations a second. Gate the draw loop on *both* an
+  `IntersectionObserver` and `visibilitychange`, tracking them as two
+  independent flags so neither event can strand the loop in the wrong state. Let
+  the canvas ignore pointer events and have the section listen on its behalf, so
+  links stay clickable.
+- **A line-art figure that responds to the cursor.** JS should write only custom
+  properties; let the stylesheet do the moving. Throttle to one
+  `requestAnimationFrame` per pointer burst.
 
 ---
 
-## Glyphs
+## 5. Glyphs
 
-Eight marks in `js/glyphs.js`, each a 48×48 inline SVG in `currentColor`:
-`nodes` · `bubble` · `ascent` · `orbit` · `grid` · `wave` · `stack` · `spark`.
-The first three map to the tagline — think, talk, initiate. An unknown name
-falls back to `nodes` rather than rendering nothing.
+A library of small marks — one per card — each an inline SVG in `currentColor`,
+uniform viewBox, stroke only, no fills. Eight is a good number: enough variety,
+few enough to hand-draw well. Tie the first few to the tagline so the marks mean
+something.
 
-Strokes draw on with `stroke-dashoffset` using a dash longer than any line in
-the file, rather than `pathLength`, which Chrome ignores on `<line>` and
-`<polyline>`.
-
----
-
-## Easter egg
-
-Konami code on `document`, plus a barely-visible `·` in the footer for anyone
-who'd never guess. Either opens a full-screen Snake overlay: arrow keys and
-swipe, score and a best score in `localStorage`, `Esc` closes and restores focus
-to whatever opened it. The overlay isn't built until someone asks for it.
-
-`profile.secret` renders the code as key caps under the About text — currently
-set, so the secret is given away on purpose.
+- An unknown name must fall back to a default rather than render nothing.
+- Animate by drawing strokes on with `stroke-dashoffset`, using a dash longer
+  than any line in the file rather than `pathLength` — Chrome ignores
+  `pathLength` on `<line>` and `<polyline>`.
+- Keep the animation in the stylesheet, hung off class names in the SVG.
 
 ---
 
-## Markdown
+## 6. Easter egg
 
-`marked` is vendored into `vendor/` and committed. No npm, one `<script>` tag.
-Posts are authored only by the site owner, so no HTML sanitization is layered
-on — worth remembering before ever accepting an outside contribution.
+The Konami code (↑↑↓↓←→←→BA) on `document`, plus a barely-visible dot in the
+footer for anyone who'd never guess. Either opens a full-screen Snake overlay:
+arrow keys and swipe, score plus a best score in `localStorage`, `Esc` closes
+and restores focus to whatever opened it. Don't build the overlay until someone
+asks for it, and keep it hidden from the accessibility tree while closed.
 
-**Known trade-off:** posts render client-side, so post text isn't in the initial
-HTML and crawlers see only the shell. That's the accepted cost of no build step.
-If search ever matters, the fix is a small Node script that pre-renders each
-post to static HTML at deploy time, without changing how posts are authored.
+Give the owner a config key that renders the code as key caps under the About
+text, so they can choose whether to give the secret away.
 
 ---
 
-## Local development
+## 7. Markdown
+
+Vendor the parser and commit it — one `<script>` tag, no npm. Posts are authored
+only by the site owner, so HTML sanitization isn't layered on; note that in a
+comment, because it stops being true the moment anyone else contributes.
+
+**Known trade-off:** rendering posts client-side means the text isn't in the
+initial HTML, so crawlers and link previews see only the shell. That's the
+accepted cost of having no build step. If search ever matters, the fix is a
+small script that pre-renders each post to static HTML at deploy time — it
+doesn't change how posts are authored, which is the part worth protecting.
+
+---
+
+## 8. Local development
+
+Serve it, don't open the files:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Not by opening the file directly — posts are `fetch`ed, which browsers block
-over `file://`. And there's no fingerprinting on filenames, so an edit that
-seems to do nothing is the browser cache: **Cmd+Shift+R**.
+Posts are `fetch`ed, which browsers block over `file://`. Also warn in the
+README that with no build step there's no filename fingerprinting, so an edit
+that appears to do nothing is the browser cache — hard-refresh.
 
 ---
 
-## Deploy
+## 9. Deploy
 
-Pushed to `github.com/denizzmcr/personal-website`, `main`.
-
-Vercel import: framework preset **Other**, root directory `./`, build command
-empty, output directory empty (there's no `public/`, so Vercel serves the repo
-root). `vercel.json` sets `cleanUrls: true` and `trailingSlash: false`, so
-`/blog` works as well as `/blog.html`. Every push to `main` redeploys.
+1. `.gitignore` for `.DS_Store`, `node_modules/`, `.vercel`. Commit on `main`,
+   push to the git host.
+2. Import on Vercel: framework preset **Other**, root directory `./`, build
+   command and output directory both empty — with no `public/`, the repo root is
+   served as-is.
+3. `vercel.json` with `cleanUrls: true` and `trailingSlash: false`, so `/blog`
+   works as well as `/blog.html`.
+4. Every push to `main` redeploys.
 
 ---
-
-## Open
-
-- [ ] **Vercel isn't connected yet.** The site is on GitHub only — not live.
-- [ ] Real content. `projects` and `posts` still hold the example entries, and
-      `posts/example-post.md` is still the sample. `profile.bio` is empty, so
-      the footer line doesn't render.
-- [ ] Confirm the Drive résumé link is shared as **Viewer**, not Editor.
-- [ ] The résumé carries a phone number, now one click from a public page.
-      Worth a decision either way.
-- [ ] `CLAUDE.md` is tracked and therefore public. It's an instruction file for
-      Claude Code, not part of the website — removing it from the repo while
-      keeping it locally would work fine.
-- [ ] The bar field has never been *visually* confirmed — it was only ever
-      checked in an automation tab where rAF was frozen. Worth one look in a
-      real browser.
 
 ## Verification
 
-At `http://localhost:8000`:
+Serve locally, then check:
 
 - [ ] All four pages load, nav marks the current page, no console errors.
-- [ ] Contact buttons hit the right targets; email copies to clipboard.
-- [ ] `/post.html?p=example-post` renders with the right title and date; a bogus
-      slug shows "Post not found".
-- [ ] Adding a second `.md` plus a `content.js` entry makes it appear on both
-      the blog index and the home page, newest first — the real test of the
-      authoring flow.
-- [ ] Emptying `projects` or `posts` shows the quiet empty line, not a break.
-- [ ] Glyphs animate on hover and on scroll-in; the thinker tracks the cursor.
-- [ ] Konami opens Snake; arrows steer; `Esc` closes and returns focus.
+- [ ] Contact buttons hit the right targets; the email button copies.
+- [ ] The example post renders with the right title and date; a bogus slug shows
+      "Post not found"; prev/next link correctly.
+- [ ] **Adding a second `.md` plus a config entry** makes it appear on both the
+      blog index and the home page, newest first. This is the real test — it's
+      the whole authoring flow.
+- [ ] Emptying `projects` or `posts` gives the quiet empty line, not a break.
+      Same for each optional profile field.
+- [ ] Glyphs animate on hover and on scroll-in; the hero figure tracks the
+      cursor; the canvas reacts to the pointer.
+- [ ] Konami opens the game; arrows steer; `Esc` closes and returns focus.
 - [ ] 375 / 768 / 1440px — no horizontal scroll at any width.
-- [ ] Reduce Motion on: the canvas and every animation stop, site stays usable.
+- [ ] Reduce Motion on: canvas and every animation stop, site stays fully usable.
 - [ ] Keyboard-only pass: every link and button reachable, focus ring visible.
+- [ ] Changing `--ink` alone re-themes everything, game included.
+- [ ] Lighthouse: performance and accessibility both ≥ 95.
 
 Then deploy and repeat the pass on the live URL, on a phone.
-
----
-
-## Divergences from the first draft
-
-Recorded so the history makes sense:
-
-- **Colour accent dropped.** The original plan had `--accent: #2b5cff`; the
-  redesign (`f123f32`) went fully monochrome.
-- **`experience` array removed** (`97a5c36`), replaced by the About block and
-  the résumé link — a CV says it better than a list of rows.
-- **Particle canvas and magnetic buttons replaced.** What shipped is the bar
-  field and the thinker (`10c6722`), which suit the monochrome layout better.
-- **Blog is paged**, not grouped by year.
-- **Scroll reveal is `animation-timeline: view()`**, not an
-  `IntersectionObserver` — CSS turned out to be enough.
