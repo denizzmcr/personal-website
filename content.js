@@ -36,7 +36,7 @@ window.CONTENT = {
     // repo, where it stays in the git history for good.)
     // Empty means no résumé button is shown at all.
     resume:
-      "https://docs.google.com/document/d/1Y8eqqW-PN5IUSF-IS6IY2U0zPjTmBc4m/preview",
+      "https://drive.google.com/file/d/1azBJdKr1AkxnMYJOA5XvZI7nEf04Zo_9/view",
   },
 
   /* ── PROJECTS ───────────────────────────────────────────────
