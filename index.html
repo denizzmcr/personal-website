@@ -21,6 +21,7 @@
     <script defer src="content.js"></script>
     <script defer src="js/glyphs.js"></script>
     <script defer src="js/site.js"></script>
+    <script defer src="js/hero.js"></script>
     <script defer src="js/game.js"></script>
   </head>
 
@@ -31,16 +32,49 @@
 
     <main id="main" class="wrap">
       <section class="hero">
-        <!-- Text below is the fallback for no-JS; content.js is authoritative. -->
-        <h1 class="hero-name" data-hero-name>Deniz Mucur</h1>
-        <p class="hero-tagline" data-hero-tagline>
-          I think, talk (sometimes too much) &amp; initiate
-        </p>
-        <div class="contact" data-contact>
-          <a class="btn" href="https://github.com/denizzmcr">GitHub</a>
-          <a class="btn" href="https://www.linkedin.com/in/deniz-mucur-66b63136b/">LinkedIn</a>
-          <a class="btn" href="mailto:denizmucur5@gmail.com">Email</a>
+        <canvas class="hero-bg" id="hero-bg" aria-hidden="true"></canvas>
+
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <!-- Text below is the fallback for no-JS; content.js is authoritative. -->
+            <h1 class="hero-name">
+              <span class="mask"><span class="lift" data-hero-name>Deniz Mucur</span></span>
+            </h1>
+            <p class="hero-tagline">
+              <span class="mask"><span class="lift" data-hero-tagline>I think, talk (sometimes too much) &amp; initiate</span></span>
+            </p>
+            <div class="contact fade-up" data-contact>
+              <a class="btn" href="https://github.com/denizzmcr">GitHub</a>
+              <a class="btn" href="https://www.linkedin.com/in/deniz-mucur-66b63136b/">LinkedIn</a>
+              <a class="btn" href="mailto:denizmucur5@gmail.com">Email</a>
+            </div>
+          </div>
+
+          <!-- The thinker. Tilts toward the cursor; thoughts stir as you near it. -->
+          <div class="hero-figure fade-up" data-thinker>
+            <svg class="thinker" viewBox="0 0 140 150" role="img"
+                 aria-label="A line drawing of a seated figure, thinking">
+              <g class="thinker-thoughts" aria-hidden="true">
+                <circle class="th th-1" cx="48" cy="38" r="2" />
+                <circle class="th th-2" cx="37" cy="26" r="2.8" />
+                <circle class="th th-3" cx="25" cy="14" r="3.8" />
+              </g>
+              <g class="thinker-body">
+                <path d="M16 140 H128" />
+                <!-- hunched back, up from the hip to the shoulder -->
+                <path d="M94 140 C 100 116, 92 92, 78 74" />
+                <!-- thigh drawn up to a raised knee, then the shin -->
+                <path d="M94 140 C 84 136, 62 126, 52 112" />
+                <path d="M52 112 C 48 122, 46 132, 48 140" />
+                <!-- arm down to the elbow resting on that knee, then up to the chin -->
+                <path d="M78 76 C 70 88, 60 100, 54 108" />
+                <path d="M54 108 C 54 96, 56 82, 62 72" />
+                <circle class="thinker-head" cx="68" cy="60" r="11" />
+              </g>
+            </svg>
+          </div>
         </div>
+
         <div class="hero-rule" aria-hidden="true"></div>
       </section>
 

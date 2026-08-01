@@ -211,7 +211,47 @@ ol {
 
 /* ── Hero: typography as the artwork ──────────────────────── */
 .hero {
+  position: relative;
   padding: clamp(4rem, 10vw, 11rem) 0 clamp(3rem, 7vw, 7rem);
+}
+/* The bar field sits behind everything and never eats a click. */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.7;
+  /* Fades out across the headline so the field belongs to the figure
+     on the right and never competes with the type on the left. */
+  -webkit-mask-image: linear-gradient(
+    100deg,
+    transparent 10%,
+    rgba(0, 0, 0, 0.14) 38%,
+    #000 80%
+  );
+  mask-image: linear-gradient(
+    100deg,
+    transparent 10%,
+    rgba(0, 0, 0, 0.14) 38%,
+    #000 80%
+  );
+}
+.hero-inner,
+.hero-rule {
+  position: relative;
+  z-index: 1;
+}
+.hero-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+.hero-copy {
+  flex: 1 1 26rem;
 }
 .hero-name {
   font-size: var(--step-4);
@@ -229,20 +269,132 @@ ol {
   max-width: 24ch;
 }
 
-/* A CSS-drawn rule that grows on load — the only decoration. */
+/* ── Hero entrance: each line rises out of the ground ─────────
+   A mask clips the line; the inner span starts below it and lifts
+   into place. Long ease, staggered, so the page arrives rather
+   than appears. */
+.mask {
+  display: block;
+  overflow: hidden;
+  /* room for descenders, which would otherwise be clipped */
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.lift {
+  display: block;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lift {
+    transform: translateY(115%);
+    animation: lift 1.5s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s) forwards;
+  }
+  .fade-up {
+    opacity: 0;
+    transform: translateY(22px);
+    animation: fade-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s) forwards;
+  }
+  .hero-rule {
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: rule-grow 1.6s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s) forwards;
+  }
+}
+@keyframes lift {
+  to {
+    transform: none;
+  }
+}
+@keyframes fade-up {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rule-grow {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.hero-name .lift {
+  --d: 0.15s;
+}
+.hero-tagline .lift {
+  --d: 0.42s;
+}
+.hero .contact {
+  --d: 0.72s;
+}
+.hero-figure {
+  --d: 0.88s;
+}
 .hero-rule {
+  --d: 1.05s;
   height: 1px;
   background: var(--ink);
   margin-top: clamp(3rem, 6vw, 5rem);
-  transform-origin: left center;
-  animation: rule-grow 1.4s var(--ease) both;
 }
-@keyframes rule-grow {
-  from {
-    transform: scaleX(0);
+
+/* ── The thinker ──────────────────────────────────────────── */
+.hero-figure {
+  flex: 0 0 auto;
+  width: clamp(6.5rem, 11vw, 9.5rem);
+}
+.thinker {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Head leans toward the cursor. JS only sets --tilt; CSS does the moving. */
+.thinker-head {
+  transform: rotate(var(--tilt, 0deg));
+  transform-box: view-box;
+  transform-origin: 78px 74px; /* the neck, so the head pivots on it */
+  transition: transform 0.7s var(--ease);
+}
+.thinker-thoughts circle {
+  fill: var(--ink);
+  stroke: none;
+  opacity: calc(0.18 + var(--think, 0) * 0.62);
+  transition: opacity 0.6s var(--ease);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .thinker-thoughts circle {
+    animation: drift 4.5s ease-in-out infinite;
   }
-  to {
-    transform: scaleX(1);
+  .th-2 {
+    animation-delay: 0.5s;
+  }
+  .th-3 {
+    animation-delay: 1s;
+  }
+  /* a click sends the top thought off */
+  .hero-figure.has-idea .th-3 {
+    animation: idea 1s var(--ease);
+  }
+}
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes idea {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-22px) scale(1.8);
+    opacity: 0;
   }
 }
 

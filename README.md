@@ -14,11 +14,25 @@ Ahlin-style minimalism, and the rules are worth keeping if you extend it:
   heavy; body text is medium weight and capped at roughly 70 characters a line.
 - **Flex card grid.** Two half-width cards, then one full-width feature,
   repeating. Handled by `.card:nth-child(3n)` — nothing to set per card.
-- **Motion is CSS, never JavaScript.** Hover uses layered box-shadows for depth;
-  inline links animate an underline via `::after`; the scroll reveal uses
-  `animation-timeline: view()`, which degrades to plain visible text in browsers
-  that don't support it.
+- **Layout motion is CSS.** Hover uses layered box-shadows for depth; inline
+  links animate an underline via `::after`; the hero rises out of a mask on
+  load; the scroll reveal uses `animation-timeline: view()`, which degrades to
+  plain visible text in browsers that don't support it.
 - **No images.** Illustration is CSS shapes, inline SVG and typography.
+
+Two things in the hero can't be done in CSS and live in `js/hero.js`:
+
+- **The bar field** behind the hero — vertical lines with short bars that ease
+  between two noise-seeded patterns on a ~26 second cycle. The pointer thickens
+  nearby lines and a click sends a ring outward. It's masked to fade out across
+  the headline so it never competes with the type.
+- **The thinker** — the seated figure. Its head leans toward your cursor and its
+  thoughts brighten as you approach; clicking it lets one go. JavaScript only
+  writes two custom properties, `--tilt` and `--think`; the stylesheet does the
+  actual moving.
+
+Both are skipped entirely under `prefers-reduced-motion`, and both pause when
+the hero scrolls off screen or the tab loses focus.
 
 ## Running it locally
 
@@ -102,6 +116,7 @@ content.js      ← the file you edit
 posts/*.md      your writing
 css/style.css   the whole design system; tokens are at the top
 js/site.js      rendering, list paging, email copy
+js/hero.js      the bar field and the thinker
 js/glyphs.js    the SVG marks
 js/post.js      loads and renders a Markdown post
 js/game.js      the easter egg
