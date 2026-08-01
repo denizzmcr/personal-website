@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Deniz Mucur</title>
+    <meta
+      name="description"
+      content="Deniz Mucur — I think, talk (sometimes too much) & initiate."
+    />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/style.css" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Deniz Mucur" />
+    <meta
+      property="og:description"
+      content="I think, talk (sometimes too much) & initiate."
+    />
+
+    <script defer src="content.js"></script>
+    <script defer src="js/glyphs.js"></script>
+    <script defer src="js/site.js"></script>
+    <script defer src="js/hero.js"></script>
+    <script defer src="js/game.js"></script>
+  </head>
+
+  <body data-page="home">
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="site-head" data-site-head></header>
+
+    <main id="main">
+      <section class="hero">
+        <canvas id="hero-canvas" aria-hidden="true"></canvas>
+        <div class="wrap">
+          <!-- Text below is the fallback for no-JS; content.js is authoritative. -->
+          <h1 data-hero-name>Deniz Mucur</h1>
+          <p class="tagline" data-hero-tagline>
+            I think, talk (sometimes too much) &amp; initiate
+          </p>
+          <div class="contact" data-contact>
+            <a class="btn" href="https://github.com/denizzmcr">GitHub</a>
+            <a class="btn" href="https://www.linkedin.com/in/deniz-mucur-66b63136b/">LinkedIn</a>
+            <a class="btn" href="mailto:denizmucur5@gmail.com">Email</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="wrap">
+        <section class="section reveal">
+          <div class="section-head">
+            <h2>Writing</h2>
+            <a class="section-more" href="blog.html">All writing</a>
+          </div>
+          <div class="entries" data-home-posts></div>
+        </section>
+
+        <section class="section reveal">
+          <div class="section-head">
+            <h2>Projects</h2>
+            <a class="section-more" href="projects.html">All projects</a>
+          </div>
+          <div class="entries" data-home-projects></div>
+        </section>
+
+        <section class="section reveal">
+          <div class="section-head">
+            <h2>Experience</h2>
+          </div>
+          <ul class="entries" data-experience></ul>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-foot" data-site-foot></footer>
+  </body>
+</html>
