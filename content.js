@@ -35,7 +35,8 @@ window.CONTENT = {
     // downloads instead, but it means committing the PDF to this public
     // repo, where it stays in the git history for good.)
     // Empty means no résumé button is shown at all.
-    resume: "",
+    resume:
+      "https://docs.google.com/document/d/1Y8eqqW-PN5IUSF-IS6IY2U0zPjTmBc4m/preview",
   },
 
   /* ── PROJECTS ───────────────────────────────────────────────
