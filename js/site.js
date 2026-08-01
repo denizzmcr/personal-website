@@ -40,6 +40,8 @@ const ICONS = {
   linkedin:
     '<svg viewBox="0 0 20 16.5" aria-hidden="true"><path d="M3.5 1.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM1.7 6.2h3.6V15H1.7V6.2Zm5.6 0h3.45v1.2h.05c.48-.87 1.65-1.8 3.4-1.8 3.63 0 4.3 2.3 4.3 5.3V15h-3.6v-3.6c0-.86-.02-1.96-1.25-1.96-1.25 0-1.44.94-1.44 1.9V15H7.3V6.2Z"/></svg>',
   mail: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 2.5h13a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Zm.9 1.7L8 8.6l5.6-4.4H2.4Zm11.6 1.3-5.4 4.3a1 1 0 0 1-1.2 0L2 5.5v6.3h12V5.5Z"/></svg>',
+  download:
+    '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7.25 1.5h1.5v6.19l2.22-2.22 1.06 1.06L8 10.56 3.97 6.53l1.06-1.06L7.25 7.69V1.5ZM2.5 11H4v2h8v-2h1.5v3.5h-11V11Z"/></svg>',
 };
 
 /* ── shared chrome ────────────────────────────────────────── */
@@ -207,21 +209,34 @@ function renderHome() {
     "Nothing to show yet."
   );
 
-  fill(
-    "[data-experience]",
-    (C.experience || [])
-      .map(
-        (x) => `
-      <li class="xp rise">
-        <span class="xp-org">${esc(x.org)}</span>
-        <span class="xp-period">${esc(x.period)}</span>
-        <span class="xp-role">${esc(x.role)}</span>
-        ${x.note ? `<span class="xp-note">${esc(x.note)}</span>` : ""}
-      </li>`
-      )
-      .join(""),
-    "Nothing here yet."
-  );
+  renderAbout();
+}
+
+/** A couple of sentences and a link to the CV. Hidden until there's one or
+    the other, so a half-filled section never ships. */
+function renderAbout() {
+  const section = document.querySelector("[data-about-section]");
+  if (!section) return;
+
+  const about = (C.profile.about || "").trim();
+  const resume = (C.links.resume || "").trim();
+  if (!about && !resume) return; // stays hidden
+
+  section.hidden = false;
+  section.querySelector("[data-about]").textContent = about;
+
+  const slot = section.querySelector("[data-resume]");
+  if (!resume) {
+    slot.remove();
+    return;
+  }
+  // `download` only works same-origin, so a hosted CV opens in a tab instead.
+  const external = /^https?:/i.test(resume);
+  slot.innerHTML = `<a class="btn" href="${esc(resume)}"${
+    external ? ' target="_blank" rel="noopener"' : " download"
+  }>${ICONS.download}<span>${
+    external ? "View résumé" : "Download résumé"
+  }</span></a>`;
 }
 
 function renderProjectsPage() {

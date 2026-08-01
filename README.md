@@ -71,13 +71,26 @@ The blog index renders eight posts at a time and loads the rest as you scroll,
 with a "Load more" button as the guaranteed path. Change `PAGE_SIZE` in
 `js/site.js` to adjust.
 
-## Adding a project or a role
+## Adding a project
 
-Same idea — copy the example block in the `projects` or `experience` list in
-`content.js`. Setting `featured: true` on a project also puts it on the home
-page (up to three).
+Copy the example block in the `projects` list in `content.js`. Setting
+`featured: true` also puts it on the home page (up to three).
 
 Delete an entry entirely and that section just says nothing is there yet.
+
+## The About block and your résumé
+
+There's no experience list — an About block does that job instead, and it's
+driven by two fields in `content.js`:
+
+- `profile.about` — two or three sentences on who you are.
+- `links.resume` — your CV. Put the PDF in this folder and write its filename
+  (`"deniz-mucur-cv.pdf"`), and the button downloads it. Paste a full
+  `https://` link instead and it opens in a new tab, because browsers only
+  honour a forced download for files served from the same site.
+
+The whole block stays hidden until at least one of those has something in it,
+so a half-filled section never ships.
 
 ## Glyphs
 

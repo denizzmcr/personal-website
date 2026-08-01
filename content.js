@@ -11,7 +11,12 @@ window.CONTENT = {
     name: "Deniz Mucur",
     tagline: "I think, talk (sometimes too much) & initiate",
 
-    // 2–3 sentences about you. Shows at the bottom of every page.
+    // 2–3 sentences on who you are. This is the About block on the home
+    // page. Leave it empty and the block hides itself.
+    about: "",
+
+    // One line for the foot of every page — a signature, not a repeat of
+    // the above. Leave it empty and it hides too.
     bio: "",
   },
 
@@ -19,6 +24,11 @@ window.CONTENT = {
     github: "https://github.com/denizzmcr",
     linkedin: "https://www.linkedin.com/in/deniz-mucur-66b63136b/",
     email: "denizmucur5@gmail.com",
+
+    // Your CV. Put the PDF in this folder and write its filename here,
+    // e.g. "deniz-mucur-cv.pdf" — or paste a full https:// link if it
+    // lives somewhere else. Empty means no résumé link is shown.
+    resume: "",
   },
 
   /* ── PROJECTS ───────────────────────────────────────────────
@@ -40,18 +50,6 @@ window.CONTENT = {
       ],
       glyph: "ascent",
       featured: true,
-    },
-  ],
-
-  /* ── EXPERIENCE ─────────────────────────────────────────────
-     Newest first. `note` is optional — one short line.
-     ─────────────────────────────────────────────────────────── */
-  experience: [
-    {
-      org: "Example Org",
-      role: "Your title",
-      period: "2025 — now",
-      note: "",
     },
   ],
 
