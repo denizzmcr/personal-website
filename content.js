@@ -13,7 +13,12 @@ window.CONTENT = {
 
     // 2–3 sentences on who you are. This is the About block on the home
     // page. Leave it empty and the block hides itself.
-    about: "",
+    about:
+      "I think, I talk more than I probably should, and I start things. Mostly I like taking something apart to work out why it is the way it is, and then arguing about whether it ought to be. I live to discover secrets, so here is one of mine.",
+
+    // The keys below render as caps under the About text — the easter egg
+    // code. Set it to "" to keep the secret.
+    secret: "↑ ↑ ↓ ↓ ← → ← → B A",
 
     // One line for the foot of every page — a signature, not a repeat of
     // the above. Leave it empty and it hides too.

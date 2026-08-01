@@ -30,6 +30,9 @@ The rules, if you extend it:
 - **No build step.** Run it with `python3 -m http.server 8000` and open
   <http://localhost:8000> — not by double-clicking the HTML. Posts are fetched
   as files, which browsers block over `file://`.
+  If you edit something and the page doesn't change, it's the browser cache:
+  hard-refresh with **Cmd+Shift+R**. There's no filename hashing to force it,
+  so an ordinary refresh will happily reuse an old `content.js`.
 - **Posts are Markdown**, rendered in the browser by `vendor/marked.min.js`.
   The trade-off: post text isn't in the HTML source, so search engines see only
   the shell. Fine for a personal blog. If that ever matters, the fix is a small
@@ -42,7 +45,8 @@ The rules, if you extend it:
   cursor. Both pause off-screen and in hidden tabs, and neither runs under
   `prefers-reduced-motion`.
 - **Easter egg.** The Konami code — ↑↑↓↓←→←→BA — opens a game of Snake. So does
-  the faint dot beside the copyright line.
+  the faint dot beside the copyright line. The About block gives the code away
+  as key caps; set `profile.secret` to `""` to keep it hidden again.
 
 ## Layout
 

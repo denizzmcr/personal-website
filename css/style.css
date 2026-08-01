@@ -554,6 +554,35 @@ ol {
 .about-text:empty {
   display: none;
 }
+/* The easter egg code, as key caps that light up together on hover. */
+.about-secret {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: clamp(1.5rem, 3vw, 2.25rem);
+}
+.about-secret:empty {
+  display: none;
+}
+.about-secret kbd {
+  min-width: 2rem;
+  padding: 0.5rem 0.55rem;
+  font: 500 var(--step--1) / 1 var(--sans);
+  text-align: center;
+  color: var(--faint);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  transition: color 0.35s var(--ease), border-color 0.35s var(--ease),
+    transform 0.35s var(--ease);
+}
+.about-secret:hover kbd {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.about-secret kbd:hover {
+  transform: translateY(-2px);
+}
+
 .about-actions {
   margin-top: clamp(1.75rem, 3.5vw, 2.75rem);
   font-size: var(--step-0);

@@ -219,11 +219,23 @@ function renderAbout() {
   if (!section) return;
 
   const about = (C.profile.about || "").trim();
+  const secret = (C.profile.secret || "").trim();
   const resume = (C.links.resume || "").trim();
-  if (!about && !resume) return; // stays hidden
+  if (!about && !secret && !resume) return; // stays hidden
 
   section.hidden = false;
   section.querySelector("[data-about]").textContent = about;
+
+  // The easter egg code, one <kbd> per key.
+  const keys = section.querySelector("[data-secret]");
+  if (secret) {
+    keys.innerHTML = secret
+      .split(/\s+/)
+      .map((k) => `<kbd>${esc(k)}</kbd>`)
+      .join("");
+  } else {
+    keys.remove();
+  }
 
   const slot = section.querySelector("[data-resume]");
   if (!resume) {
